@@ -58,6 +58,8 @@ func main() {
 	}
 	defer db.Close()
 
+	db.SetConnMaxLifetime(2 * time.Hour)
+
 	if len(os.Args) > 1 {
 		logPath := fmt.Sprintf("%s/fakessh-%s.log", os.Args[1], time.Now().Format("2006-01-02-15-04-05-000"))
 		logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
