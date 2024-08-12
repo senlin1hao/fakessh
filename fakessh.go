@@ -107,7 +107,7 @@ func passwordCallback(conn ssh.ConnMetadata, password []byte) (*ssh.Permissions,
 	log.Println("Password login attempt:", conn.RemoteAddr(), string(conn.ClientVersion()), conn.User(), string(password))
 
 	// Save to database
-	_, err := db.Exec("INSERT IGNORE INTO ssh (user, password, sha256) VALUES (?, ?, ?)", conn.User(), string(password), passwordHashHex)
+	_, err := db.Exec("INSERT IGNORE INTO ssh (username, password, sha256) VALUES (?, ?, ?)", conn.User(), string(password), passwordHashHex)
 	if err != nil {
 		log.Println("Failed to save login attempt to database:", err)
 	}

@@ -49,10 +49,10 @@ Database structure：
 ```
 
 CREATE TABLE `ssh` (
-  `user` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `password` text COLLATE utf8mb4_general_ci NOT NULL,
   `sha256` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  PRIMARY KEY (`user`,`sha256`)
+  PRIMARY KEY (`username`,`sha256`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 ```
