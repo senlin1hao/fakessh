@@ -42,7 +42,7 @@ DB_PASSWORD=your_db_password
 DB_HOST=your_db_host
 DB_PORT=your_db_port
 DB_NAME=your_db_name
-DB_DRIVER="mysql"/"postgresql"
+DB_DRIVER=mysql/postgres
 
 ```
 
