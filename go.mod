@@ -9,3 +9,5 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 )
+
+require github.com/lib/pq v1.10.9 // indirect

@@ -32,7 +32,7 @@ docker logs -f fakessh
 
 2、Add support for private key login and log the login IP and username.
 
-3、Add MySQL record for username-password-password SHA256 functionality. The database environment variables must be set, otherwise the program will not start.
+3、Add MySQL/PostgreSQL record for username-password-password SHA256 functionality. The database environment variables must be set, otherwise the program will not start.
 
 Environment variables：
 ```
@@ -42,11 +42,13 @@ DB_PASSWORD=your_db_password
 DB_HOST=your_db_host
 DB_PORT=your_db_port
 DB_NAME=your_db_name
+DB_DRIVER="mysql"/"postgresql"
 
 ```
 
 Database structure：
 ```
+mysql
 
 CREATE TABLE `ssh` (
   `username` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
@@ -55,6 +57,14 @@ CREATE TABLE `ssh` (
   PRIMARY KEY (`username`,`sha256`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+postgresql
+
+CREATE TABLE ssh (
+  username VARCHAR(255) NOT NULL,
+  password TEXT NOT NULL,
+  sha256 CHAR(64) NOT NULL,
+  PRIMARY KEY (username, sha256)
+);
 ```
 
 Fork quick start
@@ -65,6 +75,7 @@ docker run -d \
            -e DB_HOST=your_db_host \
            -e DB_PORT=your_db_port \
            -e DB_NAME=your_db_name \
+           -e DB_DRIVER="mysql"/"postgresql" \
            --restart=always -p 22:22
            --name fakessh senlin1hao/fakessh
 

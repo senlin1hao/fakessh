@@ -9,6 +9,7 @@ import (
 	"net"
 	"os"
 	"time"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 
@@ -17,6 +18,7 @@ import (
 	"encoding/hex"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -33,10 +35,18 @@ var (
 		"SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6",
 	}
 	db *sql.DB
+	dbDriver string
 )
 
 func main() {
 	// Read database connection details from environment variables
+	dbDriver = os.Getenv("DB_DRIVER")
+
+	if dbDriver == "" {
+		dbDriver = "mysql"
+	}
+	dbDriver = strings.ToLower(dbDriver)
+
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")
@@ -48,11 +58,19 @@ func main() {
 	}
 
 	// Build Data Source Name
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
+	var dsn string
+	switch dbDriver {
+	case "mysql":
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
+	case "postgresql":
+		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	default:
+		log.Fatal("Unsupported database driver:", dbDriver)
+	}
 
-	// Connect to MySQL
+	// Connect to database
 	var err error
-	db, err = sql.Open("mysql", dsn)
+	db, err = sql.Open(dbDriver, dsn)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
@@ -107,7 +125,16 @@ func passwordCallback(conn ssh.ConnMetadata, password []byte) (*ssh.Permissions,
 	log.Println("Password login attempt:", conn.RemoteAddr(), string(conn.ClientVersion()), conn.User(), string(password))
 
 	// Save to database
-	_, err := db.Exec("INSERT IGNORE INTO ssh (username, password, sha256) VALUES (?, ?, ?)", conn.User(), string(password), passwordHashHex)
+	var query string
+	switch dbDriver {
+	case "mysql":
+		query = "INSERT IGNORE INTO ssh (username, password, sha256) VALUES (?, ?, ?)"
+	case "postgresql":
+		query = "INSERT INTO ssh (username, password, sha256) VALUES ($1, $2, $3) ON CONFLICT (username, sha256) DO NOTHING"
+	default:
+		log.Println("Unsupported database driver:", dbDriver)
+	}
+	_, err := db.Exec(query, conn.User(), string(password), passwordHashHex)
 	if err != nil {
 		log.Println("Failed to save login attempt to database:", err)
 	}
