@@ -75,7 +75,7 @@ docker run -d \
            -e DB_HOST=your_db_host \
            -e DB_PORT=your_db_port \
            -e DB_NAME=your_db_name \
-           -e DB_DRIVER="mysql"/"postgresql" \
+           -e DB_DRIVER=mysql/postgres \
            --restart=always -p 22:22
            --name fakessh senlin1hao/fakessh
 

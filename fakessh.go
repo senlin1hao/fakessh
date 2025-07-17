@@ -62,7 +62,7 @@ func main() {
 	switch dbDriver {
 	case "mysql":
 		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
-	case "postgresql":
+	case "postgres":
 		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 	default:
 		log.Fatal("Unsupported database driver:", dbDriver)
@@ -129,7 +129,7 @@ func passwordCallback(conn ssh.ConnMetadata, password []byte) (*ssh.Permissions,
 	switch dbDriver {
 	case "mysql":
 		query = "INSERT IGNORE INTO ssh (username, password, sha256) VALUES (?, ?, ?)"
-	case "postgresql":
+	case "postgres":
 		query = "INSERT INTO ssh (username, password, sha256) VALUES ($1, $2, $3) ON CONFLICT (username, sha256) DO NOTHING"
 	default:
 		log.Println("Unsupported database driver:", dbDriver)
